@@ -6,21 +6,52 @@ using System.Threading.Tasks;
 
 namespace Configuration
 {
+	/// <summary>
+	/// Interface for configuration key
+	/// </summary>
 	public interface IConfigKey : IEnumerable<KeyValuePair<string, string>>
 	{
 		#region Properties
 
+		/// <summary>
+		/// Gets the name of the key
+		/// </summary>
 		string Name { get; }
-		string this[string value] { get; }
-		IEnumerable<string> Values { get; }
-		IEnumerable<string> ValuesData { get; }
+
+		/// <summary>
+		/// Gets the value with the given name
+		/// </summary>
+		/// <param name="value">The name of the value to retrieve</param>
+		/// <returns>Returns the value data</returns>
+		object this[string value] { get; }
+
+		/// <summary>
+		/// Gets the values in the key
+		/// </summary>
+		IDictionary<string, INamedValue> Values { get; }
+
+		/// <summary>
+		/// Gets the count of values in the key
+		/// </summary>
 		int Count { get; }
 		#endregion
 
 		#region Methods
 
+		/// <summary>
+		/// Checks if value with the given name exists in the key
+		/// </summary>
+		/// <param name="value">The name of the value to check.</param>
+		/// <returns>true if value with the given name exists; otherwise false.</returns>
 		bool ContainsValue(string value);
-		bool TryGetValue(string value, out string valueData);
+		
+		/// <summary>
+		/// Safely retrieves the value's data
+		/// </summary>
+		/// <param name="value">The value's name</param>
+		/// <param name="valueData">Out: the data under the value</param>
+		/// <returns>true if the data successfuly retrieved; otherwise false.</returns>
+		bool TryGetValue(string value, out object valueData);
 		#endregion
 	}
 }
