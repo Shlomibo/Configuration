@@ -9,7 +9,7 @@ namespace Configuration
 	/// <summary>
 	/// Interface for configuration key
 	/// </summary>
-	public interface IConfigKey : IEnumerable<KeyValuePair<string, string>>
+	public interface IConfigKey : IEnumerable<INamedValue>
 	{
 		#region Properties
 
@@ -28,7 +28,7 @@ namespace Configuration
 		/// <summary>
 		/// Gets the values in the key
 		/// </summary>
-		IDictionary<string, INamedValue> Values { get; }
+		IReadOnlyDictionary<string, INamedValue> Values { get; }
 
 		/// <summary>
 		/// Gets the count of values in the key
@@ -52,6 +52,15 @@ namespace Configuration
 		/// <param name="valueData">Out: the data under the value</param>
 		/// <returns>true if the data successfuly retrieved; otherwise false.</returns>
 		bool TryGetValue(string value, out object valueData);
+
+		/// <summary>
+		/// Safely retrieves the value's data
+		/// </summary>
+		/// <typeparam name="T">The value's type</typeparam>
+		/// <param name="value">The value's name</param>
+		/// <param name="valueData">Out: the data under the value</param>
+		/// <returns>true if the data successfuly retrieved; otherwise false.</returns>
+		bool TryGetValue<T>(string value, out T valueData);
 		#endregion
 	}
 }

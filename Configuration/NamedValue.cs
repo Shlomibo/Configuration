@@ -31,7 +31,7 @@ namespace Configuration
 		/// <summary>
 		/// Gets the value's data
 		/// </summary>
-		T Value { get; set; }
+		new T Value { get; set; }
 	}
 
 	/// <summary>
@@ -40,6 +40,8 @@ namespace Configuration
 	/// <typeparam name="T">The type of the data</typeparam>
 	public class NamedValue<T> : INamedValue<T>
 	{
+		#region Properties
+
 		/// <summary>
 		/// Gets the value's data
 		/// </summary>
@@ -54,7 +56,49 @@ namespace Configuration
 		{
 			get { return this.Value; }
 			set { this.Value = (T)value; }
-		}
-	}
+		} 
+		#endregion
 
+		#region Ctor
+
+		/// <summary>
+		/// Create new NamedValue
+		/// </summary>
+		/// <param name="name">The value's name</param>
+		public NamedValue(string name)
+		{
+			if (name == null)
+			{
+				throw new ArgumentNullException("name");
+			}
+
+			this.Name = name;
+			this.Value = default(T);
+		}
+
+		/// <summary>
+		/// Create new NamedValue
+		/// </summary>
+		/// <param name="name">The value's name</param>
+		/// <param name="valueData">The value's data</param>
+		public NamedValue(string name, T valueData)
+			: this(name)
+		{
+			this.Value = valueData;
+		}
+		#endregion
+
+		#region Operators
+
+		/// <summary>
+		/// Cast from NamedValue&lt;T&gt; to T
+		/// </summary>
+		/// <param name="namedValue"></param>
+		/// <returns></returns>
+		public static explicit operator T(NamedValue<T> namedValue)
+		{
+			return namedValue.Value;
+		}
+		#endregion
+	}
 }
