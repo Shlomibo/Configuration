@@ -9,6 +9,9 @@ using System.Threading.Tasks;
 
 namespace Configuration
 {
+	/// <summary>
+	/// Configuration key base class
+	/// </summary>
 	public abstract class ConfigKey : IConfigKey
 	{
 		#region Consts
@@ -18,16 +21,30 @@ namespace Configuration
 
 		#region Properties
 
+		/// <summary>
+		/// Gets the name of the key
+		/// </summary>
 		public abstract string Name { get; }
 
+		/// <summary>
+		/// Gets the properties that have been marked with ConfigKeyAttribute
+		/// </summary>
 		protected PropertyCollection Properties { get; private set; }
 
+		/// <summary>
+		/// Gets or sets the value with the given name
+		/// </summary>
+		/// <param name="valueName">The name of the value to retrieve</param>
+		/// <returns>Returns the value data</returns>
 		public object this[string valueName]
 		{
 			get { return GetConfigValue(this.Properties[valueName]); }
 			set { SetConfigValue(this.Properties[valueName], value); }
 		}
 
+		/// <summary>
+		/// Gets a dictionary of named values in the key
+		/// </summary>
 		public IReadOnlyDictionary<string, INamedValue> Values
 		{
 			get
@@ -52,6 +69,9 @@ namespace Configuration
 			}
 		}
 
+		/// <summary>
+		/// Gets the count of named values in the key
+		/// </summary>
 		public int Count
 		{
 			get { return this.Properties.Count; }
@@ -60,6 +80,9 @@ namespace Configuration
 
 		#region Ctor
 
+		/// <summary>
+		/// Initialize the config key
+		/// </summary>
 		protected ConfigKey()
 		{
 			this.Properties = new PropertyCollection(GetType());
@@ -68,6 +91,11 @@ namespace Configuration
 
 		#region Methods
 
+		/// <summary>
+		/// Set the configuration value. IE, the value in configuration, not the property
+		/// </summary>
+		/// <param name="property">The property to set</param>
+		/// <param name="value">The value in configuration</param>
 		protected void SetConfigValue(PropertyInfo property, object value)
 		{
 			ConfigValueAttribute attribute = ConfigValueAttribute.GetAttribute(property);
@@ -81,6 +109,11 @@ namespace Configuration
 			property.SetValue(this, value);
 		}
 
+		/// <summary>
+		/// Gets the configuratino value from the property
+		/// </summary>
+		/// <param name="property">The property of the value</param>
+		/// <returns>The configuration value for that property</returns>
 		protected object GetConfigValue(PropertyInfo property)
 		{
 			ConfigValueAttribute attribute = ConfigValueAttribute.GetAttribute(property);
@@ -100,11 +133,22 @@ namespace Configuration
 			return value;
 		}
 
+		/// <summary>
+		/// Checks if value with the given name exists in the key
+		/// </summary>
+		/// <param name="value">The name of the value to check.</param>
+		/// <returns>true if value with the given name exists; otherwise false.</returns>
 		public bool ContainsValue(string value)
 		{
 			return this.Properties.ContainsKey(value);
 		}
 
+		/// <summary>
+		/// Safely retrieves the value's data
+		/// </summary>
+		/// <param name="value">The value's name</param>
+		/// <param name="valueData">Out: the data under the value</param>
+		/// <returns>true if the data successfuly retrieved; otherwise false.</returns>
 		public bool TryGetValue(string value, out object valueData)
 		{
 			valueData = null;
@@ -126,6 +170,13 @@ namespace Configuration
 			return didSucceed;
 		}
 
+		/// <summary>
+		/// Safely retrieves the value's data
+		/// </summary>
+		/// <typeparam name="T">The value's type</typeparam>
+		/// <param name="value">The value's name</param>
+		/// <param name="valueData">Out: the data under the value</param>
+		/// <returns>true if the data successfuly retrieved; otherwise false.</returns>
 		public bool TryGetValue<T>(string value, out T valueData)
 		{
 			valueData = default(T);
@@ -147,6 +198,10 @@ namespace Configuration
 			return didSucceed;
 		}
 
+		/// <summary>
+		/// Returns an enumerator that iterates through the collection.
+		/// </summary>
+		/// <returns>A IEnumerator&lt;T&gt; that can be used to iterate through the collection.</returns>
 		public IEnumerator<INamedValue> GetEnumerator()
 		{
 			return this.Values.Values.GetEnumerator();

@@ -19,11 +19,11 @@ namespace Configuration
 		string Name { get; }
 
 		/// <summary>
-		/// Gets the value with the given name
+		/// Gets or sets the value with the given name
 		/// </summary>
-		/// <param name="value">The name of the value to retrieve</param>
+		/// <param name="namedValue">The name of the value to retrieve</param>
 		/// <returns>Returns the value data</returns>
-		object this[string value] { get; }
+		object this[string namedValue] { get; set; }
 
 		/// <summary>
 		/// Gets the values in the key

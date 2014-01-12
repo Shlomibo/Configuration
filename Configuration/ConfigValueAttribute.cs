@@ -7,6 +7,9 @@ using System.Threading.Tasks;
 
 namespace Configuration
 {
+	/// <summary>
+	/// Marks properties as configuration named values.
+	/// </summary>
 	[AttributeUsage(AttributeTargets.Property, Inherited = true, AllowMultiple = false)]
 	public sealed class ConfigValueAttribute : Attribute
 	{
@@ -53,16 +56,31 @@ namespace Configuration
 
 		#region Ctor
 
+		/// <summary>
+		/// Marks the property as named value
+		/// </summary>
 		public ConfigValueAttribute()
 		{
 		}
 
+		/// <summary>
+		/// Marks the property as named value, with the given name
+		/// </summary>
+		/// <param name="configName">The name for the named value, for the property</param>
 		public ConfigValueAttribute(string configName)
 			: this()
 		{
 			this.ConfigName = configName;
 		}
 
+		/// <summary>
+		/// Marks the property as named value, with the given name, and null value substitute
+		/// </summary>
+		/// <param name="configName">The name for the named value, for the property</param>
+		/// <param name="nullValue">
+		/// A value that would be placed in case of null
+		/// This value needs to be of the configuration type, if it's different that the property type.
+		/// </param>
 		public ConfigValueAttribute(string configName, object nullValue)
 			: this(configName)
 		{
@@ -72,6 +90,11 @@ namespace Configuration
 
 		#region Methods
 
+		/// <summary>
+		/// Gets the attribute that placed for the given proeprty
+		/// </summary>
+		/// <param name="property">The property to extraxt the attribute from.</param>
+		/// <returns>The attribute that stored for that property.</returns>
 		public static ConfigValueAttribute GetAttribute(PropertyInfo property)
 		{
 			return (ConfigValueAttribute)Attribute.GetCustomAttribute(property, typeof(ConfigValueAttribute));

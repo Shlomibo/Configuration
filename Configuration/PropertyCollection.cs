@@ -8,16 +8,22 @@ using System.Threading.Tasks;
 
 namespace Configuration
 {
+	/// <summary>
+	/// Provides dictionary access to type's properties, that have marked with ConfigValueAttribute
+	/// </summary>
 	public class PropertyCollection : IDictionary<string, PropertyInfo>
 	{
 		#region Fields
 
 		private Dictionary<string, PropertyInfo> byPropName;
-		private Dictionary<string, PropertyInfo> byKeyName;
+		private Dictionary<string, PropertyInfo> byConfigName;
 		#endregion
 
 		#region Properties
 
+		/// <summary>
+		/// The type which contains the properties
+		/// </summary>
 		public Type ParentType { get; private set; }
 
 		private Dictionary<string, PropertyInfo> ByPropertyName
@@ -33,16 +39,16 @@ namespace Configuration
 			}
 		}
 
-		private Dictionary<string, PropertyInfo> ByKeyName
+		private Dictionary<string, PropertyInfo> ByConfigName
 		{
 			get
 			{
-				if (this.byKeyName == null)
+				if (this.byConfigName == null)
 				{
 					BuildPropList();
 				}
 
-				return this.byKeyName;
+				return this.byConfigName;
 			}
 		}
 
@@ -51,21 +57,35 @@ namespace Configuration
 			get { return this.PropertyNames; }
 		}
 
+		/// <summary>
+		/// Gets collection of the properties' names
+		/// </summary>
 		public ICollection<string> PropertyNames
 		{
 			get { return this.ByPropertyName.Keys; }
 		}
 
-		public ICollection<string> KeyNames
+		/// <summary>
+		/// Gets collection of the configuration's value names
+		/// </summary>
+		public ICollection<string> ConfigNames
 		{
-			get { return this.ByKeyName.Keys; }
+			get { return this.ByConfigName.Keys; }
 		}
 
+		/// <summary>
+		/// Gets collection of the property objects, which have been marked with ConfigValueAttribute
+		/// </summary>
 		public ICollection<PropertyInfo> Values
 		{
 			get { return this.ByPropertyName.Values; }
 		}
 
+		/// <summary>
+		/// Gets the property object, with the given name, or configuration name
+		/// </summary>
+		/// <param name="key">The property, or configuration name</param>
+		/// <returns>The property with the given name</returns>
 		public PropertyInfo this[string key]
 		{
 			get
@@ -73,7 +93,7 @@ namespace Configuration
 				PropertyInfo value;
 
 				if (!this.ByPropertyName.TryGetValue(key, out value) &&
-					!this.ByKeyName.TryGetValue(key, out value))
+					!this.ByConfigName.TryGetValue(key, out value))
 				{
 					throw new KeyNotFoundException();
 				}
@@ -88,6 +108,9 @@ namespace Configuration
 			set { throw new NotSupportedException(); }
 		}
 
+		/// <summary>
+		/// Gets the count of configuration properties
+		/// </summary>
 		public int Count
 		{
 			get { return this.ByPropertyName.Count; }
@@ -101,6 +124,10 @@ namespace Configuration
 
 		#region Ctor
 
+		/// <summary>
+		/// Creates PropertyCollection for the given type.
+		/// </summary>
+		/// <param name="parentType">The type for which properties whould be accessed</param>
 		public PropertyCollection(Type parentType)
 		{
 			this.ParentType = parentType;
@@ -128,7 +155,7 @@ namespace Configuration
 				prop => prop.Property.Name,
 				prop => prop.Property);
 
-			byKeyName = propData.ToDictionary(
+			byConfigName = propData.ToDictionary(
 				prop => prop.Attribute.ConfigName ?? prop.Property.Name,
 				prop => prop.Property);
 		}
@@ -138,10 +165,15 @@ namespace Configuration
 			throw new NotSupportedException();
 		}
 
+		/// <summary>
+		/// Checks if property with the given name or configuration name exists
+		/// </summary>
+		/// <param name="key">Property or configuration name</param>
+		/// <returns>true if such property esixts; otherwise false.</returns>
 		public bool ContainsKey(string key)
 		{
 			return this.ByPropertyName.ContainsKey(key) ||
-				this.ByKeyName.ContainsKey(key);
+				this.ByConfigName.ContainsKey(key);
 		}
 
 		bool IDictionary<string, PropertyInfo>.Remove(string key)
@@ -149,10 +181,16 @@ namespace Configuration
 			return false;
 		}
 
+		/// <summary>
+		/// Tries to get property with the given property or configuration name
+		/// </summary>
+		/// <param name="key">Property or configuration name</param>
+		/// <param name="value">Out: the property with the given name</param>
+		/// <returns>True if such property exists, and retrieved; otherwise false.</returns>
 		public bool TryGetValue(string key, out PropertyInfo value)
 		{
 			return this.ByPropertyName.TryGetValue(key, out value) ||
-				this.ByKeyName.TryGetValue(key, out value);
+				this.ByConfigName.TryGetValue(key, out value);
 		}
 
 		void ICollection<KeyValuePair<string, PropertyInfo>>.Add(KeyValuePair<string, PropertyInfo> item)
