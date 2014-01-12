@@ -52,6 +52,11 @@ namespace Configuration
 		/// Gets or sets the type of the value in configuration (is it's not the same as the property)
 		/// </summary>
 		public Type ConfigType { get; set; }
+
+		/// <summary>
+		/// Gets or sets value, that indicates if the name should be stored with the value.
+		/// </summary>
+		public bool IsNameVisible { get; set; }
 		#endregion
 
 		#region Ctor
@@ -61,6 +66,7 @@ namespace Configuration
 		/// </summary>
 		public ConfigValueAttribute()
 		{
+			this.IsNameVisible = true;
 		}
 
 		/// <summary>

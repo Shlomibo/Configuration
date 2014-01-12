@@ -60,7 +60,10 @@ namespace Configuration
 								let value = accomodator != null
 									? accomodator.Accomodate(prop.GetValue(this))
 									: prop.GetValue(this)
-								select (INamedValue)Activator.CreateInstance(namedValueType, name, value);
+								select (INamedValue)Activator.CreateInstance(namedValueType, 
+											name, 
+											value, 
+											attribute.IsNameVisible);
 
 				return rowValues.ToDictionary(
 					value => value.Name,

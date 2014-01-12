@@ -159,9 +159,12 @@ namespace Configuration
 		/// <typeparam name="T">The type of the value's data</typeparam>
 		/// <param name="valueName">The name of the value</param>
 		/// <param name="valueData">The data of the value</param>
-		public void Add<T>(string valueName, T valueData)
+		/// <param name="isNameVisible">
+		/// Gets or or sets value that indicates if the name should be visible in the configuration storage
+		/// </param>
+		public void Add<T>(string valueName, T valueData, bool isNameVisible = true)
 		{
-			this.Values.Add(valueName, new NamedValue<T>(valueName, valueData));
+			this.Values.Add(valueName, new NamedValue<T>(valueName, valueData, isNameVisible));
 		}
 
 		/// <summary>
@@ -184,7 +187,10 @@ namespace Configuration
 		/// If true, and the type of the new value is different than that of the old value, 
 		/// an exception would be thrown.
 		/// </param>
-		public void AddOrUpdate<T>(string valueName, T valueData, bool throwOnTypeChange)
+		/// <param name="isNameVisible">
+		/// Gets or or sets value that indicates if the name should be visible in the configuration storage
+		/// </param>
+		public void AddOrUpdate<T>(string valueName, T valueData, bool throwOnTypeChange, bool isNameVisible = true)
 		{
 			if (valueName == null)
 			{
@@ -202,7 +208,7 @@ namespace Configuration
 			}
 			else
 			{
-				this.Values[valueName] = new NamedValue<T>(valueName, valueData);
+				this.Values[valueName] = new NamedValue<T>(valueName, valueData, isNameVisible);
 			}
 		}
 		#endregion

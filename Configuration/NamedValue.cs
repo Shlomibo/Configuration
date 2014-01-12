@@ -20,6 +20,11 @@ namespace Configuration
 		/// Gets the value's data
 		/// </summary>
 		object Value { get; set; }
+
+		/// <summary>
+		/// Gets or or sets value that indicates if the name should be visible in the configuration storage
+		/// </summary>
+		bool IsNameVisible { get; set; }
 	}
 
 	/// <summary>
@@ -56,7 +61,12 @@ namespace Configuration
 		{
 			get { return this.Value; }
 			set { this.Value = (T)value; }
-		} 
+		}
+
+		/// <summary>
+		/// Gets or or sets value that indicates if the name should be visible in the configuration storage
+		/// </summary>
+		public bool IsNameVisible { get; set; }
 		#endregion
 
 		#region Ctor
@@ -85,6 +95,33 @@ namespace Configuration
 			: this(name)
 		{
 			this.Value = valueData;
+		}
+
+		/// <summary>
+		/// Create new NamedValue
+		/// </summary>
+		/// <param name="name">The value's name</param>
+		/// <param name="isNameVisible">
+		/// Gets or or sets value that indicates if the name should be visible in the configuration storage
+		/// </param>
+		public NamedValue(string name, bool isNameVisible)
+			: this(name)
+		{
+			this.IsNameVisible = isNameVisible;
+		}
+
+		/// <summary>
+		/// Create new NamedValue
+		/// </summary>
+		/// <param name="name">The value's name</param>
+		/// <param name="valueData">The value's data</param>
+		/// <param name="isNameVisible">
+		/// Gets or or sets value that indicates if the name should be visible in the configuration storage
+		/// </param>
+		public NamedValue(string name, T valueData, bool isNameVisible)
+			: this(name, valueData)
+		{
+			this.IsNameVisible = isNameVisible;
 		}
 		#endregion
 
