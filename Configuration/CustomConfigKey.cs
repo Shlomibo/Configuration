@@ -64,6 +64,8 @@ namespace Configuration
 		{
 			get { return this.Values.Count; }
 		}
+
+		public string DefaultValueName { get; set; }
 		#endregion
 
 		#region Ctor

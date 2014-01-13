@@ -34,6 +34,8 @@ namespace Configuration
 		/// Gets the count of values in the key
 		/// </summary>
 		int Count { get; }
+
+		string DefaultValueName { get; }
 		#endregion
 
 		#region Methods

@@ -26,6 +26,8 @@ namespace Configuration
 		/// </summary>
 		public abstract string Name { get; }
 
+		public abstract string DefaultValueName { get; }
+
 		/// <summary>
 		/// Gets the properties that have been marked with ConfigKeyAttribute
 		/// </summary>
@@ -63,7 +65,8 @@ namespace Configuration
 								select (INamedValue)Activator.CreateInstance(namedValueType, 
 											name, 
 											value, 
-											attribute.IsNameVisible);
+											attribute.IsNameVisible,
+											attribute.TypeParser);
 
 				return rowValues.ToDictionary(
 					value => value.Name,

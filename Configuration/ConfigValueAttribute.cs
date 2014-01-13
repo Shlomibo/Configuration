@@ -15,7 +15,8 @@ namespace Configuration
 	{
 		#region Fields
 
-		private Type accomodator; 
+		private Type accomodator;
+		private Type typeParser; 
 		#endregion
 
 		#region Properties
@@ -52,6 +53,20 @@ namespace Configuration
 		/// Gets or sets the type of the value in configuration (is it's not the same as the property)
 		/// </summary>
 		public Type ConfigType { get; set; }
+
+		public Type TypeParser
+		{
+			get { return this.typeParser; }
+			set
+			{
+				if (typeof(IParser).IsAssignableFrom(value))
+				{
+					throw new ArgumentException("Type parser must implement IParser");
+				}
+
+				this.typeParser = value;
+			}
+		}
 
 		/// <summary>
 		/// Gets or sets value, that indicates if the name should be stored with the value.
