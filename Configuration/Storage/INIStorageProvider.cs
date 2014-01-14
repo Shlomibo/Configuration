@@ -8,17 +8,20 @@ using FSPath = System.IO.Path;
 
 namespace Configuration.Storage
 {
-	public sealed class INIStorageProvider : IStorageProvider
+	/// <summary>
+	/// Provides storage of configuration into ini files.
+	/// </summary>
+	public sealed class INIStorageProvider : BaseStorageProvider
 	{
 		#region Consts
 
 		private const string UNNAMED_NAME = "unnamed";
 
 		private const string COMMENT_START = "#";
-		
+
 		private const string KEY_START = "[";
 		private const string KEY_END = "]";
-		
+
 		private const char NAME_VAL_SEPARATOR = '=';
 		#endregion
 
@@ -32,6 +35,9 @@ namespace Configuration.Storage
 
 		#region Properties
 
+		/// <summary>
+		/// Gets value indicates if the object is disposed.
+		/// </summary>
 		public bool IsDisposed { get; private set; }
 
 		public bool IsReadOnly { get; private set; }
@@ -84,15 +90,31 @@ namespace Configuration.Storage
 		}
 		#endregion
 
-		#region Methods
+		#region Ctor
 
-		private void ThrowIfDisposed()
+		public INIStorageProvider(string path, bool isReadOnly = false)
 		{
-			if (this.IsDisposed)
+			this.IsReadOnly = isReadOnly;
+
+			string fileName = FSPath.GetFileName(path);
+
+			if (path.Any(@char => FSPath.GetInvalidPathChars().Contains(@char)) ||
+				string.IsNullOrWhiteSpace(fileName) ||
+				fileName.Any(@char => FSPath.GetInvalidFileNameChars().Contains(@char)))
 			{
-				throw new ObjectDisposedException("INIStorageProvider");
+				throw new ArgumentException("Invalid path", "path");
 			}
+
+			if (isReadOnly && !File.Exists(path))
+			{
+				throw new InvalidOperationException("Cannot create file, in read only mode");
+			}
+
+			this.Path = path;
 		}
+		#endregion
+
+		#region Methods
 
 		private Stream GetStream()
 		{
@@ -101,7 +123,7 @@ namespace Configuration.Storage
 				: File.Open(this.Path, FileMode.OpenOrCreate, FileAccess.ReadWrite);
 		}
 
-		public Configuration Load()
+		public override Configuration Load()
 		{
 			ThrowIfDisposed();
 			Reset();
@@ -172,7 +194,7 @@ namespace Configuration.Storage
 			}
 		}
 
-		public Configuration Load(Configuration confToLoad)
+		public override Configuration Load(Configuration confToLoad)
 		{
 			ThrowIfDisposed();
 			Reset();
@@ -216,12 +238,7 @@ namespace Configuration.Storage
 			}
 		}
 
-		public void Update(Configuration configuration)
-		{
-			Update(configuration, false);
-		}
-
-		public void Update(Configuration configuration, bool addMissingKeys)
+		public override void Update(Configuration configuration, bool addMissingKeys)
 		{
 			ThrowIfDisposed();
 			Reset();
@@ -319,7 +336,7 @@ namespace Configuration.Storage
 		private string GetValue(IConfigKey key, string line)
 		{
 			string[] splittedVal = line.Split(NAME_VAL_SEPARATOR);
-				INamedValue namedVal = key.Values[key.DefaultValueName];
+			INamedValue namedVal = key.Values[key.DefaultValueName];
 			string valueStr = null;
 
 			if (((splittedVal.Length != 1) && (splittedVal[0].Trim() != "")) ||
@@ -345,7 +362,7 @@ namespace Configuration.Storage
 			return valueStr;
 		}
 
-		public void Save(Configuration configuration)
+		public override void Save(Configuration configuration)
 		{
 			ThrowIfDisposed();
 			Reset();
@@ -359,17 +376,12 @@ namespace Configuration.Storage
 			ReplaceFile(tempPath);
 		}
 
-		public void Dispose()
+		protected override void Dispose(bool isDisposing)
 		{
-			if (!this.IsDisposed)
+			if (this.iniStream != null)
 			{
-				if (this.iniStream != null)
-				{
-					this.iniStream.Flush();
-					this.iniStream.Dispose();
-				}
-
-				this.IsDisposed = true;
+				this.iniStream.Flush();
+				this.iniStream.Dispose();
 			}
 		}
 		#endregion
