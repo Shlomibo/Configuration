@@ -65,6 +65,9 @@ namespace Configuration
 			get { return this.Values.Count; }
 		}
 
+		/// <summary>
+		/// Gets the name of the default value.
+		/// </summary>
 		public string DefaultValueName { get; set; }
 		#endregion
 

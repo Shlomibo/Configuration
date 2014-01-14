@@ -22,8 +22,14 @@ namespace Configuration
 		/// </summary>
 		object Value { get; set; }
 
+		/// <summary>
+		/// Gets list of values
+		/// </summary>
 		IList Values { get; }
 
+		/// <summary>
+		/// Get value indicates if the value has been set
+		/// </summary>
 		bool IsValueSet { get; }
 
 		/// <summary>
@@ -37,10 +43,20 @@ namespace Configuration
 		/// <param name="valueString">String representation of the value</param>
 		void ParseString(string valueString);
 
+		/// <summary>
+		/// Adds the parsed string to the values list
+		/// </summary>
+		/// <param name="valueString"></param>
 		void AddParsedString(string valueString);
 
+		/// <summary>
+		/// Gets the type of the string parser 
+		/// </summary>
 		Type Parser { get; }
 
+		/// <summary>
+		/// Clears the value
+		/// </summary>
 		void ResetValue();
 	}
 
@@ -55,6 +71,9 @@ namespace Configuration
 		/// </summary>
 		new T Value { get; set; }
 
+		/// <summary>
+		/// Gets list of values
+		/// </summary>
 		new IList<T> Values { get; }
 	}
 
@@ -100,6 +119,9 @@ namespace Configuration
 		/// </summary>
 		public bool IsNameVisible { get; set; }
 
+		/// <summary>
+		/// Gets the type of the string parser 
+		/// </summary>
 		public Type Parser { get; private set; }
 
 		private IParser ParserObj { get; set; }
@@ -109,10 +131,18 @@ namespace Configuration
 			get { return this.values; }
 		}
 
+		/// <summary>
+		/// Gets list of values
+		/// </summary>
 		public IList<T> Values
 		{
 			get { return this.values; }
 		}
+
+		/// <summary>
+		/// Get value indicates if the value has been set
+		/// </summary>
+		public bool IsValueSet { get; set; }
 		#endregion
 
 		#region Ctor
@@ -121,6 +151,7 @@ namespace Configuration
 		/// Create new NamedValue
 		/// </summary>
 		/// <param name="name">The value's name</param>
+		/// <param name="parser">The string parser's type</param>
 		public NamedValue(string name, Type parser = null)
 		{
 			if (name == null)
@@ -140,6 +171,7 @@ namespace Configuration
 		/// </summary>
 		/// <param name="name">The value's name</param>
 		/// <param name="valueData">The value's data</param>
+		/// <param name="parser">The string parser's type</param>
 		public NamedValue(string name, T valueData, Type parser = null)
 			: this(name, parser)
 		{
@@ -153,6 +185,7 @@ namespace Configuration
 		/// <param name="isNameVisible">
 		/// Gets or or sets value that indicates if the name should be visible in the configuration storage
 		/// </param>
+		/// <param name="parser">The string parser's type</param>
 		public NamedValue(string name, bool isNameVisible, Type parser = null)
 			: this(name, parser)
 		{
@@ -167,6 +200,7 @@ namespace Configuration
 		/// <param name="isNameVisible">
 		/// Gets or or sets value that indicates if the name should be visible in the configuration storage
 		/// </param>
+		/// <param name="parser">The string parser's type</param>
 		public NamedValue(string name, T valueData, bool isNameVisible, Type parser = null)
 			: this(name, valueData, parser)
 		{
@@ -176,11 +210,19 @@ namespace Configuration
 
 		#region Methods
 
+		/// <summary>
+		/// Parses the string
+		/// </summary>
+		/// <param name="valueString">String representation of the value</param>
 		public void ParseString(string valueString)
 		{
 			this.Value = (T)this.ParserObj.Parse(valueString);
 		}
 
+		/// <summary>
+		/// Adds the parsed string to the values list
+		/// </summary>
+		/// <param name="valueString"></param>
 		public void AddParsedString(string valueString)
 		{
 			T parsed = (T)this.ParserObj.Parse(valueString);
@@ -193,6 +235,20 @@ namespace Configuration
 			{
 				this.Values.Add(parsed);
 			}
+		}
+
+		/// <summary>
+		/// Clears the value
+		/// </summary>
+		public void ResetValue()
+		{
+			if (this.values.Count > 1)
+			{
+				this.values.RemoveRange(1, this.values.Count - 1);
+			}
+
+			this.Value = default(T);
+			this.IsValueSet = false;
 		}
 		#endregion
 
@@ -208,19 +264,5 @@ namespace Configuration
 			return namedValue.Value;
 		}
 		#endregion
-
-
-		public bool IsValueSet { get; set; }
-
-		public void ResetValue()
-		{
-			if (this.values.Count > 1)
-			{
-				this.values.RemoveRange(1, this.values.Count - 1);
-			}
-
-			this.Value = default(T);
-			this.IsValueSet = false;
-		}
 	}
 }

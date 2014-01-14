@@ -54,6 +54,9 @@ namespace Configuration
 		/// </summary>
 		public Type ConfigType { get; set; }
 
+		/// <summary>
+		/// Gets or sets the string parser's type
+		/// </summary>
 		public Type TypeParser
 		{
 			get { return this.typeParser; }

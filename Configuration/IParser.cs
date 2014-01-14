@@ -22,6 +22,7 @@ namespace Configuration
 	/// <summary>
 	/// Provides parsing functionality for named values
 	/// </summary>
+	/// <typeparam name="T">The type to convert into</typeparam>
 	public interface IParser<out T> : IParser
 	{
 		/// <summary>
@@ -29,12 +30,20 @@ namespace Configuration
 		/// </summary>
 		/// <param name="str">The string to parse</param>
 		/// <returns>The parsed object</returns>
-		T Parse(string str);
+		new T Parse(string str);
 	}
 
+	/// <summary>
+	/// The default type parser
+	/// </summary>
+	/// <typeparam name="T">The type to parse</typeparam>
 	public class DefaultTypeParse<T> : IParser<T>
 	{
-		protected static readonly IReadOnlyDictionary<Type, Func<string, object>> Conversions = new Dictionary<Type, Func<string, object>>()
+		/// <summary>
+		/// Provides conversions for the basic types
+		/// </summary>
+		protected static readonly IReadOnlyDictionary<Type, Func<string, object>> Conversions = 
+			new Dictionary<Type, Func<string, object>>()
 		{
 			{ typeof(object), str => str },
 			{ typeof(string), str => str },
@@ -57,11 +66,24 @@ namespace Configuration
 			{ typeof(Type), str => Type.GetType(str) },
 		};
 
+		/// <summary>
+		/// Parses the string into value's type
+		/// </summary>
+		/// <param name="str">The string to parse</param>
+		/// <returns>The parsed object</returns>
 		public virtual T Parse(string str)
 		{
 			if (typeof(T).IsEnum)
 			{
 				return (T)Enum.Parse(typeof(T), str);
+			}
+			else if (typeof(T).IsGenericType && 
+				(typeof(T).GetGenericTypeDefinition() == typeof(Nullable<>)) &&
+				Conversions.ContainsKey(Nullable.GetUnderlyingType(typeof(T))))
+			{
+				return str != null
+					? (T)Conversions[Nullable.GetUnderlyingType(typeof(T))](str)
+					: default(T);
 			}
 			else if (Conversions.ContainsKey(typeof(T)))
 			{

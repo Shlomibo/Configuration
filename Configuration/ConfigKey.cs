@@ -26,6 +26,9 @@ namespace Configuration
 		/// </summary>
 		public abstract string Name { get; }
 
+		/// <summary>
+		/// Gets the name of the default value.
+		/// </summary>
 		public abstract string DefaultValueName { get; }
 
 		/// <summary>

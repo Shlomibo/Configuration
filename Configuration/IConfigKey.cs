@@ -35,6 +35,9 @@ namespace Configuration
 		/// </summary>
 		int Count { get; }
 
+		/// <summary>
+		/// Gets the name of the default value.
+		/// </summary>
 		string DefaultValueName { get; }
 		#endregion
 

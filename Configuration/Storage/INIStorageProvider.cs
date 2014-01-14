@@ -36,12 +36,8 @@ namespace Configuration.Storage
 		#region Properties
 
 		/// <summary>
-		/// Gets value indicates if the object is disposed.
+		/// Gets the path to the ini file.
 		/// </summary>
-		public bool IsDisposed { get; private set; }
-
-		public bool IsReadOnly { get; private set; }
-
 		public string Path { get; private set; }
 
 		private StreamReader Reader
@@ -92,6 +88,11 @@ namespace Configuration.Storage
 
 		#region Ctor
 
+		/// <summary>
+		/// Creates new ini storage provider.
+		/// </summary>
+		/// <param name="path">The path to the ini file</param>
+		/// <param name="isReadOnly">true if only read operations should be supported; otherwise false</param>
 		public INIStorageProvider(string path, bool isReadOnly = false)
 		{
 			this.IsReadOnly = isReadOnly;
@@ -123,6 +124,10 @@ namespace Configuration.Storage
 				: File.Open(this.Path, FileMode.OpenOrCreate, FileAccess.ReadWrite);
 		}
 
+		/// <summary>
+		/// Loads configuration from storage.
+		/// </summary>
+		/// <returns>New configuration object that repersents the saved configuration</returns>
 		public override Configuration Load()
 		{
 			ThrowIfDisposed();
@@ -194,6 +199,13 @@ namespace Configuration.Storage
 			}
 		}
 
+		/// <summary>
+		/// Loads the selected configuration from storage.
+		/// </summary>
+		/// <param name="confToLoad">
+		/// Confguration object which contains the keys and values to load from storage
+		/// </param>
+		/// <returns>The loaded configuration</returns>
 		public override Configuration Load(Configuration confToLoad)
 		{
 			ThrowIfDisposed();
@@ -238,9 +250,14 @@ namespace Configuration.Storage
 			}
 		}
 
+		/// <summary>
+		/// Update the storage with the keys in the configuration
+		/// </summary>
+		/// <param name="configuration">Configuration which hold the keys to update</param>
+		/// <param name="addMissingKeys">true if new keys should be added to the storage</param>
 		public override void Update(Configuration configuration, bool addMissingKeys)
 		{
-			ThrowIfDisposed();
+			ThrowIfReadOnly();
 			Reset();
 			string tempPath = FSPath.GetTempFileName();
 			HashSet<string> existingKeys = new HashSet<string>();
@@ -362,9 +379,13 @@ namespace Configuration.Storage
 			return valueStr;
 		}
 
+		/// <summary>
+		/// Save the entire configuration to the storage.
+		/// </summary>
+		/// <param name="configuration">The configuration to save</param>
 		public override void Save(Configuration configuration)
 		{
-			ThrowIfDisposed();
+			ThrowIfReadOnly();
 			Reset();
 			string tempPath = FSPath.GetTempFileName();
 
@@ -376,6 +397,12 @@ namespace Configuration.Storage
 			ReplaceFile(tempPath);
 		}
 
+		/// <summary>
+		/// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
+		/// </summary>
+		/// <param name="isDisposing">
+		/// true to release both managed and unmanaged resources; false to release only unmanaged resources.
+		/// </param>
 		protected override void Dispose(bool isDisposing)
 		{
 			if (this.iniStream != null)
