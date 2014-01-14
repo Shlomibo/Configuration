@@ -24,6 +24,8 @@ namespace Configuration
 
 		IList Values { get; }
 
+		bool IsValueSet { get; }
+
 		/// <summary>
 		/// Gets or or sets value that indicates if the name should be visible in the configuration storage
 		/// </summary>
@@ -38,6 +40,8 @@ namespace Configuration
 		void AddParsedString(string valueString);
 
 		Type Parser { get; }
+
+		void ResetValue();
 	}
 
 	/// <summary>
@@ -73,7 +77,11 @@ namespace Configuration
 		public T Value
 		{
 			get { return this.Values[0]; }
-			set { this.Values[0] = value; }
+			set
+			{
+				this.Values[0] = value;
+				this.IsValueSet = true;
+			}
 		}
 
 		/// <summary>
@@ -175,8 +183,16 @@ namespace Configuration
 
 		public void AddParsedString(string valueString)
 		{
-			this.Values[this.Values.Count - 1] = (T)this.ParserObj.Parse(valueString);
-			this.Values.Add(default(T));
+			T parsed = (T)this.ParserObj.Parse(valueString);
+
+			if (!this.IsValueSet)
+			{
+				this.Value = parsed;
+			}
+			else
+			{
+				this.Values.Add(parsed);
+			}
 		}
 		#endregion
 
@@ -192,5 +208,19 @@ namespace Configuration
 			return namedValue.Value;
 		}
 		#endregion
+
+
+		public bool IsValueSet { get; set; }
+
+		public void ResetValue()
+		{
+			if (this.values.Count > 1)
+			{
+				this.values.RemoveRange(1, this.values.Count - 1);
+			}
+
+			this.Value = default(T);
+			this.IsValueSet = false;
+		}
 	}
 }

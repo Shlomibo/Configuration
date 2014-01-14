@@ -16,12 +16,12 @@ namespace Configuration.Storage
 		/// <summary>
 		/// Gets value indicates if the object is disposed.
 		/// </summary>
-		public bool IsDisposed { get; }
+		bool IsDisposed { get; }
 
 		/// <summary>
 		/// Gets value indicates if the storage isn't writable.
 		/// </summary>
-		public bool IsReadOnly { get; }
+		bool IsReadOnly { get; }
 		#endregion
 
 		#region Methods

@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using FSPath = System.IO.Path;
 
 namespace Configuration.Storage
 {
@@ -224,7 +225,8 @@ namespace Configuration.Storage
 		{
 			ThrowIfDisposed();
 			Reset();
-			string tempPath = System.IO.Path.GetTempFileName();
+			string tempPath = FSPath.GetTempFileName();
+			HashSet<string> existingKeys = new HashSet<string>();
 
 			using (var newConfig = new StreamWriter(tempPath))
 			{
@@ -242,6 +244,7 @@ namespace Configuration.Storage
 							lastKey = configuration.ContainsKey(GetKeyName(trimmed))
 								? configuration[GetKeyName(trimmed)]
 								: null;
+							existingKeys.Add(lastKey.Name);
 						}
 						else if (lastKey != null)
 						{
@@ -251,14 +254,66 @@ namespace Configuration.Storage
 
 					newConfig.WriteLine(line);
 				}
+
+				if (addMissingKeys)
+				{
+					IEnumerable<IConfigKey> missingKeys = from key in configuration as IEnumerable<ConfigKey>
+														  where !existingKeys.Contains(key.Name)
+														  select key;
+
+					WriteKeys(missingKeys, newConfig);
+				}
 			}
 
+			ReplaceFile(tempPath);
+		}
+
+		private void ReplaceFile(string replaceWith)
+		{
 			this.writer = null;
 			this.reader = null;
+			this.iniStream.Flush();
 			this.iniStream.Dispose();
-			File.Delete(this.Path);
-			File.Move(tempPath, this.Path);
+
+			if (FSPath.GetPathRoot(FSPath.GetFullPath(replaceWith)) == FSPath.GetPathRoot(FSPath.GetFullPath(this.Path)))
+			{
+				File.Replace(replaceWith, this.Path, null);
+			}
+			else
+			{
+				File.Delete(this.Path);
+				File.Copy(replaceWith, this.Path);
+				File.Delete(replaceWith);
+			}
+
 			this.iniStream = GetStream();
+		}
+
+		private void WriteKeys(IEnumerable<IConfigKey> keys, StreamWriter configStream)
+		{
+			foreach (IConfigKey key in keys)
+			{
+				configStream.WriteLine();
+				configStream.WriteLine("[{0}]", key.Name);
+				configStream.WriteLine();
+
+				foreach (INamedValue value in key)
+				{
+					if (value.IsNameVisible)
+					{
+						configStream.WriteLine("{0}={1}", value.Name, value.Value ?? "");
+					}
+					else
+					{
+						foreach (object val in value.Values)
+						{
+							configStream.WriteLine(val);
+						}
+					}
+				}
+			}
+
+			configStream.WriteLine();
 		}
 
 		private string GetValue(IConfigKey key, string line)
@@ -292,7 +347,16 @@ namespace Configuration.Storage
 
 		public void Save(Configuration configuration)
 		{
-			
+			ThrowIfDisposed();
+			Reset();
+			string tempPath = FSPath.GetTempFileName();
+
+			using (var newConfig = new StreamWriter(tempPath))
+			{
+				WriteKeys(configuration, newConfig);
+			}
+
+			ReplaceFile(tempPath);
 		}
 
 		public void Dispose()
