@@ -29,7 +29,7 @@ namespace Configuration
 		/// <summary>
 		/// Gets the name of the default value.
 		/// </summary>
-		public abstract string DefaultValueName { get; }
+		public virtual string DefaultValueName { get { return null; } }
 
 		/// <summary>
 		/// Gets the properties that have been marked with ConfigKeyAttribute
@@ -58,7 +58,11 @@ namespace Configuration
 								let attribute = ConfigValueAttribute.GetAttribute(prop)
 								let name = attribute.ConfigName ?? prop.Name
 								let accomodator = attribute.Accomodator != null
-									? (IConfigValueAccomodator)Activator.CreateInstance(attribute.Accomodator)
+									? attribute.AccomodatorParam == null
+										? (IConfigValueAccomodator)Activator.CreateInstance(attribute.Accomodator)
+										: (IConfigValueAccomodator)Activator.CreateInstance(
+											attribute.Accomodator, 
+											attribute.AccomodatorParam)
 									: null
 								let outType = attribute.ConfigType ?? prop.PropertyType
 								let namedValueType = typeof(NamedValue<>).MakeGenericType(outType)

@@ -34,10 +34,30 @@ namespace Configuration
 	}
 
 	/// <summary>
+	/// Privdes basic parser functionality
+	/// </summary>
+	/// <typeparam name="T">The type to convert into</typeparam>
+	public abstract class ParserBase<T> : IParser<T>
+	{
+		/// <summary>
+		/// Parses the string into value's type
+		/// </summary>
+		/// <param name="str">The string to parse</param>
+		/// <returns>The parsed object</returns>
+		public abstract T Parse(string str);
+
+		object IParser.Parse(string str)
+		{
+			return Parse(str);
+		}
+	}
+
+
+	/// <summary>
 	/// The default type parser
 	/// </summary>
 	/// <typeparam name="T">The type to parse</typeparam>
-	public class DefaultTypeParse<T> : IParser<T>
+	public class DefaultTypeParser<T> : IParser<T>
 	{
 		/// <summary>
 		/// Provides conversions for the basic types
@@ -75,7 +95,7 @@ namespace Configuration
 		{
 			if (typeof(T).IsEnum)
 			{
-				return (T)Enum.Parse(typeof(T), str);
+				return (T)Enum.Parse(typeof(T), str, true);
 			}
 			else if (typeof(T).IsGenericType && 
 				(typeof(T).GetGenericTypeDefinition() == typeof(Nullable<>)) &&

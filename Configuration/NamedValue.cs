@@ -162,7 +162,7 @@ namespace Configuration
 			this.Name = name;
 			this.Value = default(T);
 
-			this.Parser = parser ?? typeof(DefaultTypeParse<T>);
+			this.Parser = parser ?? typeof(DefaultTypeParser<T>);
 			this.ParserObj = (IParser)Activator.CreateInstance(this.Parser);
 		}
 

@@ -50,6 +50,11 @@ namespace Configuration
 		}
 
 		/// <summary>
+		/// Gets or sets the parameter to the accomodator constructor (null to use default constructor)
+		/// </summary>
+		public object AccomodatorParam { get; set; }
+
+		/// <summary>
 		/// Gets or sets the type of the value in configuration (is it's not the same as the property)
 		/// </summary>
 		public Type ConfigType { get; set; }
