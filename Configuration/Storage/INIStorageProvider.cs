@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using FSPath = System.IO.Path;
+using Utilities.Extansions;
 
 namespace Configuration.Storage
 {
@@ -291,9 +292,8 @@ namespace Configuration.Storage
 
 				if (addMissingKeys)
 				{
-					IEnumerable<IConfigKey> missingKeys = from key in configuration as IEnumerable<ConfigKey>
-														  where !existingKeys.Contains(key.Name)
-														  select key;
+					IEnumerable<IConfigKey> missingKeys = configuration.Where((IConfigKey key) => 
+																				  !existingKeys.Contains(key.Name));
 
 					WriteKeys(missingKeys, newConfig);
 				}
@@ -371,8 +371,8 @@ namespace Configuration.Storage
 				{
 					valueStr = string.Join(
 						Environment.NewLine,
-						(from val in namedVal.Values.Cast<object>().Take(namedVal.Values.Count - 1)
-						 select val ?? "").ToArray());
+						namedVal.Values.Cast<object>()
+									   .Select(val => val.NullableToString()).ToArray());
 				}
 			}
 

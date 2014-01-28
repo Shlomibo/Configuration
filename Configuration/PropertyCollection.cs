@@ -142,8 +142,7 @@ namespace Configuration
 				BindingFlags.Instance | BindingFlags.Public);
 
 			var propData = from prop in props
-						   let attributeTypes = from attData in prop.CustomAttributes
-												select attData.AttributeType
+						   let attributeTypes = prop.CustomAttributes.Select(attData => attData.AttributeType)
 						   where attributeTypes.Contains(typeof(ConfigValueAttribute))
 						   select new
 						   {
