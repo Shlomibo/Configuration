@@ -81,7 +81,7 @@ namespace Configuration
 	/// A named value that contains some data under some name, with specific type
 	/// </summary>
 	/// <typeparam name="T">The type of the data</typeparam>
-	public class NamedValue<T> : INamedValue<T>
+	public sealed class NamedValue<T> : INamedValue<T>
 	{
 		#region Fields
 
@@ -106,7 +106,7 @@ namespace Configuration
 		/// <summary>
 		/// Gets the name of the value
 		/// </summary>
-		public string Name { get; private set; }
+		public string Name { get; }
 
 		object INamedValue.Value
 		{
@@ -122,27 +122,23 @@ namespace Configuration
 		/// <summary>
 		/// Gets the type of the string parser 
 		/// </summary>
-		public Type Parser { get; private set; }
+		public Type Parser { get; }
 
-		private IParser ParserObj { get; set; }
+		private IParser ParserObj { get; }
 
-		IList INamedValue.Values
-		{
-			get { return this.values; }
-		}
+		IList INamedValue.Values =>
+			this.values;
 
 		/// <summary>
 		/// Gets list of values
 		/// </summary>
-		public IList<T> Values
-		{
-			get { return this.values; }
-		}
+		public IList<T> Values =>
+			this.values;
 
 		/// <summary>
 		/// Get value indicates if the value has been set
 		/// </summary>
-		public bool IsValueSet { get; set; }
+		public bool IsValueSet { get; private set; }
 		#endregion
 
 		#region Ctor
@@ -156,7 +152,7 @@ namespace Configuration
 		{
 			if (name == null)
 			{
-				throw new ArgumentNullException("name");
+				throw new ArgumentNullException(nameof(name));
 			}
 
 			this.Name = name;
@@ -214,10 +210,8 @@ namespace Configuration
 		/// Parses the string
 		/// </summary>
 		/// <param name="valueString">String representation of the value</param>
-		public void ParseString(string valueString)
-		{
+		public void ParseString(string valueString) =>
 			this.Value = (T)this.ParserObj.Parse(valueString);
-		}
 
 		/// <summary>
 		/// Adds the parsed string to the values list
@@ -259,10 +253,8 @@ namespace Configuration
 		/// </summary>
 		/// <param name="namedValue"></param>
 		/// <returns></returns>
-		public static explicit operator T(NamedValue<T> namedValue)
-		{
-			return namedValue.Value;
-		}
+		public static explicit operator T(NamedValue<T> namedValue) =>
+			namedValue.Value;
 		#endregion
 	}
 }

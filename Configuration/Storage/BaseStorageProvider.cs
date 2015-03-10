@@ -86,7 +86,7 @@ namespace Configuration.Storage
 		}
 
 		/// <summary>
-		/// Throws an exception if this instance is disposed
+		/// Throws an exception if this instance is disposed.
 		/// </summary>
 		protected void ThrowIfDisposed()
 		{
@@ -97,7 +97,24 @@ namespace Configuration.Storage
 		}
 
 		/// <summary>
-		/// Throw an exception if this instance is read only
+		/// Throws an exception if this instance is disposed; otherwise, run 'getter'.
+		/// </summary>
+		/// <typeparam name="T">The return type of the getter.</typeparam>
+		/// <param name="getter">A delegate to retrieve the value if this instance is not disposed.</param>
+		/// <returns>The value returned by 'getter'.</returns>
+		protected T ThrowIfDisposedOrGet<T>(Func<T> getter)
+		{
+			if (getter == null)
+			{
+				throw new NullReferenceException(nameof(getter));
+			}
+
+			ThrowIfDisposed();
+			return getter();
+		}
+
+		/// <summary>
+		/// Throw an exception if this instance is read only.
 		/// </summary>
 		protected void ThrowIfReadOnly()
 		{
@@ -107,6 +124,23 @@ namespace Configuration.Storage
 			{
 				throw new InvalidOperationException("Cannot change read only storage");
 			}
+		}
+
+		/// <summary>
+		/// Throw an exception if this instance is read only; otherwise, run 'getter'.
+		/// </summary>
+		/// <typeparam name="T">The return type of the getter.</typeparam>
+		/// <param name="getter">A delegate to retrieve the value if this instance is not disposed.</param>
+		/// <returns>The value returned by 'getter'.</returns>
+		protected T ThrowIfReadOnlyOrGet<T>(Func<T> getter)
+		{
+			if (getter == null)
+			{
+				throw new NullReferenceException(nameof(getter));
+			}
+
+			ThrowIfReadOnly();
+			return getter();
 		}
 
 		/// <summary>

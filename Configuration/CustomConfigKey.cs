@@ -10,7 +10,7 @@ namespace Configuration
 	/// <summary>
 	/// Provides config key with any value names, and data
 	/// </summary>
-	public class CustomConfigKey : IConfigKey
+	public sealed class CustomConfigKey : IConfigKey
 	{
 		#region Fields
 
@@ -29,7 +29,7 @@ namespace Configuration
 			{
 				if (value == null)
 				{
-					throw new ArgumentNullException("Name");
+					throw new ArgumentNullException(nameof(this.Name));
 				}
 
 				this.name = value;
@@ -47,23 +47,19 @@ namespace Configuration
 			set { this.Values[valueName].Value = value; }
 		}
 
-		IReadOnlyDictionary<string, INamedValue> IConfigKey.Values
-		{
-			get { return this.Values; }
-		}
+		IReadOnlyDictionary<string, INamedValue> IConfigKey.Values =>
+			this.Values;
 
 		/// <summary>
 		/// Gets a dictionary of named values
 		/// </summary>
-		public Dictionary<string, INamedValue> Values { get; private set; }
+		public Dictionary<string, INamedValue> Values { get; }
 
 		/// <summary>
 		/// Gets the count of values in the key
 		/// </summary>
-		public int Count
-		{
-			get { return this.Values.Count; }
-		}
+		public int Count =>
+			this.Values.Count;
 
 		/// <summary>
 		/// Gets the name of the default value.
@@ -91,10 +87,8 @@ namespace Configuration
 		/// </summary>
 		/// <param name="value">The name of the value to check.</param>
 		/// <returns>true if value with the given name exists; otherwise false.</returns>
-		public bool ContainsValue(string value)
-		{
-			return this.Values.ContainsKey(value);
-		}
+		public bool ContainsValue(string value) =>
+			this.Values.ContainsKey(value);
 
 		/// <summary>
 		/// Safely retrieves the value's data
@@ -148,15 +142,11 @@ namespace Configuration
 		/// Returns an enumerator that iterates through the collection.
 		/// </summary>
 		/// <returns>A IEnumerator&lt;T&gt; that can be used to iterate through the collection.</returns>
-		public IEnumerator<INamedValue> GetEnumerator()
-		{
-			return this.Values.Values.GetEnumerator();
-		}
+		public IEnumerator<INamedValue> GetEnumerator() =>
+			this.Values.Values.GetEnumerator();
 
-		IEnumerator IEnumerable.GetEnumerator()
-		{
-			return GetEnumerator();
-		}
+		IEnumerator IEnumerable.GetEnumerator() =>
+			GetEnumerator();
 
 		/// <summary>
 		/// Adds named value to the key.
@@ -167,20 +157,16 @@ namespace Configuration
 		/// <param name="isNameVisible">
 		/// Gets or or sets value that indicates if the name should be visible in the configuration storage
 		/// </param>
-		public void Add<T>(string valueName, T valueData, bool isNameVisible = true)
-		{
+		public void Add<T>(string valueName, T valueData, bool isNameVisible = true) =>
 			this.Values.Add(valueName, new NamedValue<T>(valueName, valueData, isNameVisible));
-		}
 
 		/// <summary>
 		/// Removes named value from the key
 		/// </summary>
 		/// <param name="valueName">The name of the value to remove</param>
 		/// <returns>true if the value was removed from the key; otherwise false.</returns>
-		public bool Remove(string valueName)
-		{
-			return this.Values.Remove(valueName);
-		}
+		public bool Remove(string valueName) =>
+			this.Values.Remove(valueName);
 
 		/// <summary>
 		/// Add new named value to the key, if no value with that name exists; otherwise updates the value's data.
@@ -199,7 +185,7 @@ namespace Configuration
 		{
 			if (valueName == null)
 			{
-				throw new ArgumentNullException("valueName");
+				throw new ArgumentNullException(nameof(valueName));
 			}
 
 			if (!this.Values.ContainsKey(valueName))

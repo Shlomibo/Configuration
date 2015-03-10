@@ -4,7 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using FSPath = System.IO.Path;
+using static System.IO.Path;
 using Utilities.Extansions;
 
 namespace Configuration.Storage
@@ -39,7 +39,7 @@ namespace Configuration.Storage
 		/// <summary>
 		/// Gets the path to the ini file.
 		/// </summary>
-		public string Path { get; private set; }
+		public string Path { get; }
 
 		private StreamReader Reader
 		{
@@ -98,13 +98,13 @@ namespace Configuration.Storage
 		{
 			this.IsReadOnly = isReadOnly;
 
-			string fileName = FSPath.GetFileName(path);
+			string fileName = GetFileName(path);
 
-			if (path.Any(@char => FSPath.GetInvalidPathChars().Contains(@char)) ||
+			if (path.Any(@char => GetInvalidPathChars().Contains(@char)) ||
 				string.IsNullOrWhiteSpace(fileName) ||
-				fileName.Any(@char => FSPath.GetInvalidFileNameChars().Contains(@char)))
+				fileName.Any(@char => GetInvalidFileNameChars().Contains(@char)))
 			{
-				throw new ArgumentException("Invalid path", "path");
+				throw new ArgumentException("Invalid path", nameof(path));
 			}
 
 			if (isReadOnly && !File.Exists(path))
@@ -118,12 +118,10 @@ namespace Configuration.Storage
 
 		#region Methods
 
-		private Stream GetStream()
-		{
-			return this.IsReadOnly
+		private Stream GetStream() =>
+			this.IsReadOnly
 				? File.OpenRead(this.Path)
 				: File.Open(this.Path, FileMode.OpenOrCreate, FileAccess.ReadWrite);
-		}
 
 		/// <summary>
 		/// Loads configuration from storage.
@@ -134,7 +132,7 @@ namespace Configuration.Storage
 			ThrowIfDisposed();
 			Reset();
 
-			Configuration conf = new Configuration();
+			var conf = new Configuration();
 			CustomConfigKey lastKey = null;
 
 			while (!this.Reader.EndOfStream)
@@ -158,15 +156,11 @@ namespace Configuration.Storage
 			return conf;
 		}
 
-		private bool IsKey(string line)
-		{
-			return line.StartsWith(KEY_START) && line.EndsWith(KEY_END);
-		}
+		private bool IsKey(string line) =>
+			line.StartsWith(KEY_START) && line.EndsWith(KEY_END);
 
-		private bool ShouldIgnore(string line)
-		{
-			return (line == "") || line.StartsWith(COMMENT_START);
-		}
+		private bool ShouldIgnore(string line) =>
+			string.IsNullOrWhiteSpace(line) || line.StartsWith(COMMENT_START);
 
 		private void ParseValue(string line, CustomConfigKey key)
 		{
@@ -182,15 +176,11 @@ namespace Configuration.Storage
 			}
 		}
 
-		private string GetUnnamedName()
-		{
-			return UNNAMED_NAME + this.unnamedIndex++;
-		}
+		private string GetUnnamedName() =>
+			UNNAMED_NAME + this.unnamedIndex++;
 
-		private string GetKeyName(string line)
-		{
-			return line.Substring(1, line.Length - 2);
-		}
+		private string GetKeyName(string line) =>
+			line.Substring(1, line.Length - 2);
 
 		private void Reset()
 		{
@@ -260,8 +250,8 @@ namespace Configuration.Storage
 		{
 			ThrowIfReadOnly();
 			Reset();
-			string tempPath = FSPath.GetTempFileName();
-			HashSet<string> existingKeys = new HashSet<string>();
+			string tempPath = GetTempFileName();
+			var existingKeys = new HashSet<string>();
 
 			using (var newConfig = new StreamWriter(tempPath))
 			{
@@ -309,7 +299,7 @@ namespace Configuration.Storage
 			this.iniStream.Flush();
 			this.iniStream.Dispose();
 
-			if (FSPath.GetPathRoot(FSPath.GetFullPath(replaceWith)) == FSPath.GetPathRoot(FSPath.GetFullPath(this.Path)))
+			if (GetPathRoot(GetFullPath(replaceWith)) == GetPathRoot(GetFullPath(this.Path)))
 			{
 				File.Replace(replaceWith, this.Path, null);
 			}
@@ -328,14 +318,14 @@ namespace Configuration.Storage
 			foreach (IConfigKey key in keys)
 			{
 				configStream.WriteLine();
-				configStream.WriteLine("[{0}]", key.Name);
+				configStream.WriteLine($"[{key.Name}]");
 				configStream.WriteLine();
 
 				foreach (INamedValue value in key)
 				{
 					if (value.IsNameVisible)
 					{
-						configStream.WriteLine("{0}={1}", value.Name, value.Value ?? "");
+						configStream.WriteLine($"{value.Name}={value.Value ?? ""}");
 					}
 					else
 					{
@@ -359,7 +349,7 @@ namespace Configuration.Storage
 			if (((splittedVal.Length != 1) && (splittedVal[0].Trim() != "")) ||
 				(key.DefaultValueName == null))
 			{
-				valueStr = string.Format("{0}={1}", namedVal.Name, namedVal.Value.ToString());
+				valueStr = $"{namedVal.Name}={namedVal.Value}";
 			}
 			else if (key.Values.ContainsKey(splittedVal[0]))
 			{
@@ -387,7 +377,7 @@ namespace Configuration.Storage
 		{
 			ThrowIfReadOnly();
 			Reset();
-			string tempPath = FSPath.GetTempFileName();
+			string tempPath = GetTempFileName();
 
 			using (var newConfig = new StreamWriter(tempPath))
 			{

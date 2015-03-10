@@ -42,7 +42,7 @@ namespace Configuration
 				if ((value != null) && 
 					!typeof(IConfigValueAccomodator).IsAssignableFrom(value))
 				{
-					throw new ArgumentException("Accomodator must be of type IConfigValueAccomodator", "Accomodator");
+					throw new ArgumentException("Accomodator must be of type IConfigValueAccomodator", nameof(this.Accomodator));
 				}
 
 				this.accomodator = value;
@@ -67,9 +67,9 @@ namespace Configuration
 			get { return this.typeParser; }
 			set
 			{
-				if (typeof(IParser).IsAssignableFrom(value))
+				if (!typeof(IParser).IsAssignableFrom(value))
 				{
-					throw new ArgumentException("Type parser must implement IParser");
+					throw new ArgumentException($"Type parser must implement {nameof(IParser)}");
 				}
 
 				this.typeParser = value;
@@ -79,7 +79,7 @@ namespace Configuration
 		/// <summary>
 		/// Gets or sets value, that indicates if the name should be stored with the value.
 		/// </summary>
-		public bool IsNameVisible { get; set; }
+		public bool IsNameVisible { get; set; } = true;
 		#endregion
 
 		#region Ctor
@@ -89,7 +89,6 @@ namespace Configuration
 		/// </summary>
 		public ConfigValueAttribute()
 		{
-			this.IsNameVisible = true;
 		}
 
 		/// <summary>
@@ -124,10 +123,8 @@ namespace Configuration
 		/// </summary>
 		/// <param name="property">The property to extraxt the attribute from.</param>
 		/// <returns>The attribute that stored for that property.</returns>
-		public static ConfigValueAttribute GetAttribute(PropertyInfo property)
-		{
-			return (ConfigValueAttribute)Attribute.GetCustomAttribute(property, typeof(ConfigValueAttribute));
-		}
+		public static ConfigValueAttribute GetAttribute(PropertyInfo property) =>
+			(ConfigValueAttribute)Attribute.GetCustomAttribute(property, typeof(ConfigValueAttribute));
 		#endregion
 	}
 }

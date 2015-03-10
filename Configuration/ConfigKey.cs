@@ -29,12 +29,13 @@ namespace Configuration
 		/// <summary>
 		/// Gets the name of the default value.
 		/// </summary>
-		public virtual string DefaultValueName { get { return null; } }
+		public string DefaultValueName => GetDefaultValueName();
+
 
 		/// <summary>
 		/// Gets the properties that have been marked with ConfigKeyAttribute
 		/// </summary>
-		protected PropertyCollection Properties { get; private set; }
+		protected PropertyCollection Properties { get; }
 
 		/// <summary>
 		/// Gets or sets the value with the given name
@@ -78,17 +79,14 @@ namespace Configuration
 				return rowValues.ToDictionary(
 					value => value.Name,
 					value => value);
-
 			}
 		}
 
 		/// <summary>
 		/// Gets the count of named values in the key
 		/// </summary>
-		public int Count
-		{
-			get { return this.Properties.Count; }
-		}
+		public int Count =>
+			this.Properties.Count;
 		#endregion
 
 		#region Ctor
@@ -103,6 +101,15 @@ namespace Configuration
 		#endregion
 
 		#region Methods
+
+		/// <summary>
+		/// Enables the override of the getter for 'DefaultValueName'.
+		/// </summary>
+		/// <returns>
+		/// The name of the default value.
+		/// </returns>
+		protected virtual string GetDefaultValueName() =>
+			null;
 
 		/// <summary>
 		/// Set the configuration value. IE, the value in configuration, not the property
@@ -151,10 +158,8 @@ namespace Configuration
 		/// </summary>
 		/// <param name="value">The name of the value to check.</param>
 		/// <returns>true if value with the given name exists; otherwise false.</returns>
-		public bool ContainsValue(string value)
-		{
-			return this.Properties.ContainsKey(value);
-		}
+		public bool ContainsValue(string value) =>
+			this.Properties.ContainsKey(value);
 
 		/// <summary>
 		/// Safely retrieves the value's data
@@ -215,15 +220,11 @@ namespace Configuration
 		/// Returns an enumerator that iterates through the collection.
 		/// </summary>
 		/// <returns>A IEnumerator&lt;T&gt; that can be used to iterate through the collection.</returns>
-		public IEnumerator<INamedValue> GetEnumerator()
-		{
-			return this.Values.Values.GetEnumerator();
-		}
+		public IEnumerator<INamedValue> GetEnumerator() =>
+			this.Values.Values.GetEnumerator();
 
-		IEnumerator IEnumerable.GetEnumerator()
-		{
-			return GetEnumerator();
-		} 
+		IEnumerator IEnumerable.GetEnumerator() =>
+			GetEnumerator();
 		#endregion
 	}
 }

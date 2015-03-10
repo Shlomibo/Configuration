@@ -11,7 +11,7 @@ namespace Configuration
 	/// <summary>
 	/// Provides dictionary access to type's properties, that have marked with ConfigValueAttribute
 	/// </summary>
-	public class PropertyCollection : IDictionary<string, PropertyInfo>
+	public sealed class PropertyCollection : IDictionary<string, PropertyInfo>
 	{
 		#region Fields
 
@@ -24,7 +24,7 @@ namespace Configuration
 		/// <summary>
 		/// The type which contains the properties
 		/// </summary>
-		public Type ParentType { get; private set; }
+		public Type ParentType { get; }
 
 		private Dictionary<string, PropertyInfo> ByPropertyName
 		{
@@ -52,34 +52,22 @@ namespace Configuration
 			}
 		}
 
-		ICollection<string> IDictionary<string, PropertyInfo>.Keys
-		{
-			get { return this.PropertyNames; }
-		}
+		ICollection<string> IDictionary<string, PropertyInfo>.Keys => this.PropertyNames; 
 
 		/// <summary>
 		/// Gets collection of the properties' names
 		/// </summary>
-		public ICollection<string> PropertyNames
-		{
-			get { return this.ByPropertyName.Keys; }
-		}
+		public ICollection<string> PropertyNames => this.ByPropertyName.Keys;
 
 		/// <summary>
 		/// Gets collection of the configuration's value names
 		/// </summary>
-		public ICollection<string> ConfigNames
-		{
-			get { return this.ByConfigName.Keys; }
-		}
+		public ICollection<string> ConfigNames => this.ByConfigName.Keys;
 
 		/// <summary>
 		/// Gets collection of the property objects, which have been marked with ConfigValueAttribute
 		/// </summary>
-		public ICollection<PropertyInfo> Values
-		{
-			get { return this.ByPropertyName.Values; }
-		}
+		public ICollection<PropertyInfo> Values => this.ByPropertyName.Values;
 
 		/// <summary>
 		/// Gets the property object, with the given name, or configuration name
@@ -111,15 +99,9 @@ namespace Configuration
 		/// <summary>
 		/// Gets the count of configuration properties
 		/// </summary>
-		public int Count
-		{
-			get { return this.ByPropertyName.Count; }
-		}
+		public int Count => this.ByPropertyName.Count;
 
-		bool ICollection<KeyValuePair<string, PropertyInfo>>.IsReadOnly
-		{
-			get { return true; }
-		}
+		bool ICollection<KeyValuePair<string, PropertyInfo>>.IsReadOnly => true;
 		#endregion
 
 		#region Ctor
@@ -130,6 +112,11 @@ namespace Configuration
 		/// <param name="parentType">The type for which properties whould be accessed</param>
 		public PropertyCollection(Type parentType)
 		{
+			if (parentType == null)
+			{
+				throw new NullReferenceException(nameof(parentType));
+			}
+
 			this.ParentType = parentType;
 		}
 		#endregion
@@ -138,11 +125,8 @@ namespace Configuration
 
 		private void BuildPropList()
 		{
-			IEnumerable<PropertyInfo> props = this.ParentType.GetProperties(
-				BindingFlags.Instance | BindingFlags.Public);
-
-			var propData = from prop in props
-						   let attributeTypes = prop.CustomAttributes.Select(attData => attData.AttributeType)
+			var propData = from prop in this.ParentType.GetProperties(BindingFlags.Instance | BindingFlags.Public)
+                           let attributeTypes = prop.CustomAttributes.Select(attData => attData.AttributeType)
 						   where attributeTypes.Contains(typeof(ConfigValueAttribute))
 						   select new
 						   {
@@ -169,16 +153,12 @@ namespace Configuration
 		/// </summary>
 		/// <param name="key">Property or configuration name</param>
 		/// <returns>true if such property esixts; otherwise false.</returns>
-		public bool ContainsKey(string key)
-		{
-			return this.ByPropertyName.ContainsKey(key) ||
-				this.ByConfigName.ContainsKey(key);
-		}
+		public bool ContainsKey(string key) =>
+			this.ByPropertyName.ContainsKey(key) ||
+			this.ByConfigName.ContainsKey(key);
 
-		bool IDictionary<string, PropertyInfo>.Remove(string key)
-		{
-			return false;
-		}
+		bool IDictionary<string, PropertyInfo>.Remove(string key) =>
+			false;
 
 		/// <summary>
 		/// Tries to get property with the given property or configuration name
@@ -186,11 +166,9 @@ namespace Configuration
 		/// <param name="key">Property or configuration name</param>
 		/// <param name="value">Out: the property with the given name</param>
 		/// <returns>True if such property exists, and retrieved; otherwise false.</returns>
-		public bool TryGetValue(string key, out PropertyInfo value)
-		{
-			return this.ByPropertyName.TryGetValue(key, out value) ||
-				this.ByConfigName.TryGetValue(key, out value);
-		}
+		public bool TryGetValue(string key, out PropertyInfo value) =>
+			this.ByPropertyName.TryGetValue(key, out value) ||
+			this.ByConfigName.TryGetValue(key, out value);
 
 		void ICollection<KeyValuePair<string, PropertyInfo>>.Add(KeyValuePair<string, PropertyInfo> item)
 		{
@@ -202,11 +180,9 @@ namespace Configuration
 			throw new NotSupportedException();
 		}
 
-		bool ICollection<KeyValuePair<string, PropertyInfo>>.Contains(KeyValuePair<string, PropertyInfo> item)
-		{
-			return this.ContainsKey(item.Key) &&
-				(this[item.Key] == item.Value);
-		}
+		bool ICollection<KeyValuePair<string, PropertyInfo>>.Contains(KeyValuePair<string, PropertyInfo> item) =>
+			this.ContainsKey(item.Key) &&
+			(this[item.Key] == item.Value);
 
 		void ICollection<KeyValuePair<string, PropertyInfo>>.CopyTo(
 			KeyValuePair<string, PropertyInfo>[] array,
@@ -214,7 +190,7 @@ namespace Configuration
 		{
 			if (array == null)
 			{
-				throw new ArgumentNullException("array");
+				throw new ArgumentNullException(nameof(array));
 			}
 
 			if (array.Length - arrayIndex < this.Count)
@@ -224,7 +200,7 @@ namespace Configuration
 
 			if (arrayIndex < 0)
 			{
-				throw new ArgumentOutOfRangeException("arrayIndex");
+				throw new ArgumentOutOfRangeException(nameof(arrayIndex));
 			}
 
 			var items = Enumerable.Zip(
@@ -236,27 +212,21 @@ namespace Configuration
 					Item = new KeyValuePair<string, PropertyInfo>(key, this[key]),
 				});
 
-			foreach (var item in items)
+			foreach (var element in this.Select((Item, Index) => new { Item, Index }))
 			{
-				array[item.Index + arrayIndex] = item.Item;
+				array[element.Index + arrayIndex] = element.Item;
 			}
 		}
 
-		bool ICollection<KeyValuePair<string, PropertyInfo>>.Remove(KeyValuePair<string, PropertyInfo> item)
-		{
-			return false;
-		}
+		bool ICollection<KeyValuePair<string, PropertyInfo>>.Remove(KeyValuePair<string, PropertyInfo> item) =>
+			false;
 
 		IEnumerator<KeyValuePair<string, PropertyInfo>>
-			IEnumerable<KeyValuePair<string, PropertyInfo>>.GetEnumerator()
-		{
-			return this.ByPropertyName.GetEnumerator();
-		}
+			IEnumerable<KeyValuePair<string, PropertyInfo>>.GetEnumerator() =>
+			this.ByPropertyName.GetEnumerator();
 
-		IEnumerator IEnumerable.GetEnumerator()
-		{
-			return (this as IEnumerable<KeyValuePair<string, PropertyInfo>>).GetEnumerator();
-		}
+		IEnumerator IEnumerable.GetEnumerator() =>
+			(this as IEnumerable<KeyValuePair<string, PropertyInfo>>).GetEnumerator();
 		#endregion
 	}
 }
